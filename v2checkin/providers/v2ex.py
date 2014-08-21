@@ -6,7 +6,10 @@ from __future__ import absolute_import
 
 import logging
 import lxml.html
+import pickle
 import re
+import requests
+import urlparse
 
 
 UA = 'Mozilla/5.0 (Windows NT 6.2; rv:22.0) Gecko/20130405 Firefox/23.0'
@@ -24,12 +27,34 @@ class LoginFailure(Exception):
 
 class V2EX:
 
-    def __init__(self, session):
-        self.session = session
+    def __init__(self, **kwargs):
+        self.session = requests.Session()
         self.scheme = 'http'
         self.headers = {
             'User-Agent': UA
         }
+
+        if 'cookies' in kwargs:
+            self.cookies = kwargs['cookies']
+            self.__load_cookies()
+
+    def __load_cookies(self):
+        try:
+            with open(self.cookies, 'r') as f:
+                cookies = requests.utils.cookiejar_from_dict(pickle.load(f))
+                self.session.cookies = cookies
+        except:
+            pass
+
+    def __save_cookies(self):
+        try:
+            with open(self.cookies, 'w') as f:
+                pickle.dump(
+                    requests.utils.dict_from_cookiejar(self.session.cookies),
+                    f
+                )
+        except:
+            pass
 
     def format_url(self, url):
         return '{}://www.v2ex.com{}'.format(self.scheme, url)
@@ -44,8 +69,13 @@ class V2EX:
             url, data=payload, verify=False, headers=self.headers
         )
 
+    def needs_login(self):
+        logging.info('Verifying login')
+        page = self.get('/settings')
+        return len(page.history) > 0
+
     def login(self, username, password):
-        logging.info('Logging: %s', username)
+        logging.info('Start to login as %s', username)
         response = self.get('/signin')
         response.raise_for_status()
 
@@ -66,9 +96,10 @@ class V2EX:
         if not response.history:
             raise LoginFailure()
         match = re.search(r'(.*?)://.*', response.url)
-        if match:
-            self.scheme = match.group(1)
+        self.scheme = urlparse.urlparse(response.url)[0]
         logging.debug('Protocol: %s', self.scheme)
+
+        self.__save_cookies()
 
     def parse_mission_stat(self, text):
         pattern = r'已连续登录 (\d+) 天'
