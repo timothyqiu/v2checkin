@@ -9,7 +9,10 @@ setup(
     version='0.1.1',
     license='MIT',
     author='Timothy Qiu',
-    packages=['v2checkin'],
+    packages=[
+        'v2checkin',
+        'v2checkin.providers'
+    ],
     package_data={
         'v2checkin': ['README.md', 'LICENSE']
     },
