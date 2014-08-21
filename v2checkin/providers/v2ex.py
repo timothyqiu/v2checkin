@@ -29,10 +29,9 @@ class V2EX:
 
     def __init__(self, **kwargs):
         self.session = requests.Session()
+        self.session.headers['User-Agent'] = UA
         self.scheme = 'http'
-        self.headers = {
-            'User-Agent': UA
-        }
+        self.referer = 'http://www.v2ex.com/'
 
         if 'cookies' in kwargs:
             self.cookies = kwargs['cookies']
@@ -61,13 +60,17 @@ class V2EX:
 
     def get(self, path):
         url = self.format_url(path)
-        return self.session.get(url, verify=False, headers=self.headers)
+        self.session.headers['Referer'] = self.referer
+        response = self.session.get(url, verify=False)
+        self.referer = response.url
+        return response
 
-    def post(self, path, payload):
+    def post(self, path, **kwargs):
         url = self.format_url(path)
-        return self.session.post(
-            url, data=payload, verify=False, headers=self.headers
-        )
+        self.session.headers['Referer'] = self.referer
+        response = self.session.post(url, verify=False, **kwargs)
+        self.referer = response.url
+        return response
 
     def needs_login(self):
         logging.info('Verifying login')
@@ -91,11 +94,9 @@ class V2EX:
             'once': token,
             'next': '/',
         }
-        self.session.headers.update({'Referer': self.format_url('/signin')})
-        response = self.post('/signin', payload)
+        response = self.post('/signin', data=payload)
         if not response.history:
             raise LoginFailure()
-        match = re.search(r'(.*?)://.*', response.url)
         self.scheme = urlparse.urlparse(response.url)[0]
         logging.debug('Protocol: %s', self.scheme)
 
@@ -119,9 +120,6 @@ class V2EX:
 
     def checkin(self, token):
         logging.info('Start to checkin. Good luck, Sir.')
-        self.session.headers.update({
-            'Referer': self.format_url('/mission/daily')
-        })
         self.session.headers.update({'url': '/mission/daily/redeem'})
         response = self.get('/mission/daily/redeem?once={}'.format(token))
         return self.parse_mission_stat(response.text)
