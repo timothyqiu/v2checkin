@@ -23,33 +23,31 @@ V2CHECKIN_DEFAULT_CONFIG = get_config_path('.v2checkin.config')
 V2CHECKIN_DEFAULT_COOKIES = get_config_path('.v2checkin.cookies')
 
 
+def load_config(path):
+    if os.path.exists(path):
+        logging.info('Loading config from %s', path)
+        with open(path, 'r') as f:
+            config = json.load(f)
+    else:
+        config = {}
+    return config
+
+
 def get_config():
-    try:
-        config_path = V2CHECKIN_DEFAULT_CONFIG
-        optlist, args = getopt.getopt(sys.argv[1:], 'c:u:p:', '')
+    config_path = V2CHECKIN_DEFAULT_CONFIG
+    optlist, args = getopt.getopt(sys.argv[1:], 'c:u:p:', '')
 
-        for key, value in optlist:
-            if key == '-c':
-                config_path = value
+    for key, value in optlist:
+        if key == '-c':
+            config_path = value
 
-        if os.path.exists(config_path):
-            logging.info('Loading config from %s', config_path)
-            with open(config_path, 'r') as f:
-                try:
-                    config = json.load(f)
-                except Exception as e:
-                    logging.error('Found an error in config: %s', e.message)
-        else:
-            config = {}
+    config = load_config(config_path)
 
-        for key, value in optlist:
-            if key == '-u':
-                config['username'] = value
-            elif key == '-p':
-                config['password'] = value
-    except getopt.GetoptError as e:
-        print >>sys.stderr, e
-        sys.exit(2)
+    for key, value in optlist:
+        if key == '-u':
+            config['username'] = value
+        elif key == '-p':
+            config['password'] = value
 
     if not config:
         raise Exception('Config not specified')
