@@ -33,12 +33,12 @@ def get_config():
                 config_path = value
 
         if os.path.exists(config_path):
-            logging.info('loading config from %s', config_path)
+            logging.info('Loading config from %s', config_path)
             with open(config_path, 'r') as f:
                 try:
                     config = json.load(f)
                 except Exception as e:
-                    logging.error('found an error in config: %s', e.message)
+                    logging.error('Found an error in config: %s', e.message)
         else:
             config = {}
 
@@ -52,18 +52,17 @@ def get_config():
         sys.exit(2)
 
     if not config:
-        logging.error('config not specified')
-        sys.exit(2)
+        raise Exception('Config not specified')
 
     if 'username' not in config:
-        logging.error(
-            'Username not found. Check the config file or use the -u option.')
-        sys.exit(2)
+        raise Exception(
+            'Username not found. Check the config file or use the -u option.'
+        )
 
     if 'password' not in config:
-        logging.error(
-            'Password not found. Check the config file or use the -p option.')
-        sys.exit(2)
+        raise Exception(
+            'Password not found. Check the config file or use the -p option.'
+        )
 
     config['cookies'] = config.get('cookies', V2CHECKIN_DEFAULT_COOKIES)
 
