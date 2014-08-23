@@ -15,11 +15,6 @@ import urlparse
 UA = 'Mozilla/5.0 (Windows NT 6.2; rv:22.0) Gecko/20130405 Firefox/23.0'
 
 
-class NotLoggedIn(Exception):
-    def __init__(self):
-        Exception.__init__(self, 'Not logged in.')
-
-
 class LoginFailure(Exception):
     def __init__(self):
         Exception.__init__(self, 'Login failed.')
@@ -30,8 +25,8 @@ class V2EX:
     def __init__(self, **kwargs):
         self.session = requests.Session()
         self.session.headers['User-Agent'] = UA
-        self.scheme = 'http'
-        self.referer = 'http://www.v2ex.com/'
+        self.baseurl = 'https://www.v2ex.com/'
+        self.referer = self.baseurl
 
         if 'cookies' in kwargs:
             self.cookies = kwargs['cookies']
@@ -55,20 +50,26 @@ class V2EX:
         except:
             pass
 
-    def format_url(self, url):
-        return '{}://www.v2ex.com{}'.format(self.scheme, url)
+    def __get_url(self, url):
+        return urlparse.urljoin(self.baseurl, url)
 
-    def get(self, path):
-        url = self.format_url(path)
+    def get(self, url, **kwargs):
         self.session.headers['Referer'] = self.referer
-        response = self.session.get(url, verify=False)
+        response = self.session.get(
+            self.__get_url(url),
+            verify=False,
+            **kwargs
+        )
         self.referer = response.url
         return response
 
-    def post(self, path, **kwargs):
-        url = self.format_url(path)
+    def post(self, url, **kwargs):
         self.session.headers['Referer'] = self.referer
-        response = self.session.post(url, verify=False, **kwargs)
+        response = self.session.post(
+            self.__get_url(url),
+            verify=False,
+            **kwargs
+        )
         self.referer = response.url
         return response
 
@@ -79,10 +80,10 @@ class V2EX:
 
     def login(self, username, password):
         logging.info('Start to login as %s', username)
-        response = self.get('/signin')
-        response.raise_for_status()
+        page = self.get('/signin')
+        page.raise_for_status()
 
-        tree = lxml.html.fromstring(response.text)
+        tree = lxml.html.fromstring(page.text)
         once = tree.xpath('//input[@name="once"]/@value')
         if not once:
             raise Exception('Cannot find login token')
@@ -94,11 +95,9 @@ class V2EX:
             'once': token,
             'next': '/',
         }
-        response = self.post('/signin', data=payload)
-        if not response.history:
+        page = self.post('/signin', data=payload)
+        if not page.history:
             raise LoginFailure()
-        self.scheme = urlparse.urlparse(response.url)[0]
-        logging.debug('Protocol: %s', self.scheme)
 
         self.__save_cookies()
 
@@ -116,5 +115,5 @@ class V2EX:
         action = tree.xpath('//input/@onclick')[0]
         match = re.match(r".+?=\s*'(.+)'", action)
 
-        logging.info('Checking in')
+        logging.info('Start to checkin')
         self.get(match.group(1))

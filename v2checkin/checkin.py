@@ -22,8 +22,7 @@ def checkin():
 
     if client.needs_login():
         client.login(USERNAME, PASSWORD)
-        success = not client.needs_login()
-        logging.info('Login result: %s', success)
+        logging.info('Login success')
     else:
         logging.info('Already logged in')
 
@@ -37,7 +36,7 @@ def checkin():
 
 def main():
     LOG_FORMAT = '%(asctime)s %(levelname)-8s %(message)s'
-    logging.basicConfig(level=logging.DEBUG,
+    logging.basicConfig(level=logging.INFO,
                         format=LOG_FORMAT,
                         filemode='a+')
     logging.addLevelName(logging.WARNING, 'WARN')
