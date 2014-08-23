@@ -22,15 +22,17 @@ def checkin():
 
     if client.needs_login():
         client.login(USERNAME, PASSWORD)
+        success = not client.needs_login()
+        logging.info('Login result: %s', success)
+    else:
+        logging.info('Already logged in')
 
-    stat = client.get_mission_stat()
-    if not stat['complete']:
-        stat = client.checkin(stat['token'])
-
-    logging.info('{} days of login. Checked in today: {}'.format(
-        stat['days'],
-        stat['complete'],
-    ))
+    if client.needs_checkin():
+        client.checkin()
+        success = not client.needs_checkin()
+        logging.info('Checkin result: %s', success)
+    else:
+        logging.info('Already checked in')
 
 
 def main():

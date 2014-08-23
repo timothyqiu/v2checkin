@@ -102,30 +102,19 @@ class V2EX:
 
         self.__save_cookies()
 
-    def parse_mission_stat(self, text):
-        pattern = r'已连续登录 (\d+) 天'
-        match = re.search(pattern, text)
-        if not match:
-            raise Exception('Statistics not found.')
-        days = int(match.group(1))
-        pattern = r'/mission/daily/redeem\?once=(\d+)'
-        match = re.search(pattern, text)
-        stat = {
-            'days': days,
-            'complete': match is None
-        }
-        if match:
-            stat['token'] = match.group(1)
-        return stat
+    def needs_checkin(self):
+        logging.info('Verifying checkin')
+        page = self.get('/mission/daily')
+        tree = lxml.html.fromstring(page.text)
+        action = tree.xpath('//input/@onclick')[0]
+        return '/mission/daily' in action
 
-    def checkin(self, token):
-        logging.info('Start to checkin. Good luck, Sir.')
-        self.session.headers.update({'url': '/mission/daily/redeem'})
-        response = self.get('/mission/daily/redeem?once={}'.format(token))
-        return self.parse_mission_stat(response.text)
+    def checkin(self):
+        logging.info('Getting checkin token')
+        page = self.get('/mission/daily')
+        tree = lxml.html.fromstring(page.text)
+        action = tree.xpath('//input/@onclick')[0]
+        match = re.match(r".+?=\s*'(.+)'", action)
 
-    def get_mission_stat(self):
-        response = self.get('/mission/daily')
-        if re.search(self.format_url('/signin'), response.url):
-            raise NotLoggedIn()
-        return self.parse_mission_stat(response.text)
+        logging.info('Checking in')
+        self.get(match.group(1))
