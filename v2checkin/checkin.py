@@ -28,8 +28,6 @@ def checkin():
 
     if client.needs_checkin():
         client.checkin()
-        success = not client.needs_checkin()
-        logging.info('Checkin result: %s', success)
     else:
         logging.info('Already checked in')
 

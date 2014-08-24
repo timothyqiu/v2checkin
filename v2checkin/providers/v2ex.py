@@ -20,6 +20,11 @@ class LoginFailure(Exception):
         Exception.__init__(self, 'Login failed.')
 
 
+class CheckinFailure(Exception):
+    def __init__(self):
+        Exception.__init__(self, 'Checkin failed.')
+
+
 class V2EX:
 
     def __init__(self, **kwargs):
@@ -81,13 +86,8 @@ class V2EX:
     def login(self, username, password):
         logging.info('Start to login as %s', username)
         page = self.get('/signin')
-        page.raise_for_status()
-
         tree = lxml.html.fromstring(page.text)
-        once = tree.xpath('//input[@name="once"]/@value')
-        if not once:
-            raise Exception('Cannot find login token')
-        token = once[0]
+        token = tree.xpath('//input[@name="once"]/@value')[0]
 
         payload = {
             'u': username,
@@ -101,9 +101,10 @@ class V2EX:
 
         self.__save_cookies()
 
-    def needs_checkin(self):
+    def needs_checkin(self, page=None):
         logging.info('Verifying checkin')
-        page = self.get('/mission/daily')
+        if not page:
+            page = self.get('/mission/daily')
         tree = lxml.html.fromstring(page.text)
         action = tree.xpath('//input/@onclick')[0]
         return '/mission/daily' in action
@@ -116,4 +117,7 @@ class V2EX:
         match = re.match(r".+?=\s*'(.+)'", action)
 
         logging.info('Start to checkin')
-        self.get(match.group(1))
+        page = self.get(match.group(1))
+
+        if self.needs_checkin(page):
+            raise CheckinFailure()
