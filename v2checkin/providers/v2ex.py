@@ -11,25 +11,18 @@ import re
 import requests
 import urlparse
 
-
-UA = 'Mozilla/5.0 (Windows NT 6.2; rv:22.0) Gecko/20130405 Firefox/23.0'
-
-
-class LoginFailure(Exception):
-    def __init__(self):
-        Exception.__init__(self, 'Login failed.')
+from .. import config
+from ..exception import LoginFailure, CheckinFailure
 
 
-class CheckinFailure(Exception):
-    def __init__(self):
-        Exception.__init__(self, 'Checkin failed.')
+COOKIES = config.get_config_path('.v2checkin.v2ex.cookies')
 
 
-class V2EX:
+class Client:
 
     def __init__(self, **kwargs):
         self.session = requests.Session()
-        self.session.headers['User-Agent'] = UA
+        self.session.headers['User-Agent'] = config.AGENT
         self.baseurl = 'https://www.v2ex.com/'
         self.referer = self.baseurl
 

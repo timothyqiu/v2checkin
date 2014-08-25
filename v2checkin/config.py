@@ -11,6 +11,9 @@ import os
 import sys
 
 
+AGENT = 'Mozilla/5.0 (Windows NT 6.2; rv:22.0) Gecko/20130405 Firefox/23.0'
+
+
 def get_config_path(path):
     if os.path.exists(path):
         return path
@@ -20,7 +23,6 @@ def get_config_path(path):
 
 
 V2CHECKIN_DEFAULT_CONFIG = get_config_path('.v2checkin.config')
-V2CHECKIN_DEFAULT_COOKIES = get_config_path('.v2checkin.cookies')
 
 
 def load_config(path):
@@ -61,7 +63,5 @@ def get_config():
         raise Exception(
             'Password not found. Check the config file or use the -p option.'
         )
-
-    config['cookies'] = config.get('cookies', V2CHECKIN_DEFAULT_COOKIES)
 
     return config

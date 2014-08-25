@@ -7,7 +7,7 @@ from __future__ import absolute_import
 import logging
 import sys
 
-from .providers.v2ex import V2EX
+from .providers import v2ex
 from .config import get_config
 
 
@@ -16,9 +16,8 @@ def checkin():
 
     USERNAME = config['username']
     PASSWORD = config['password']
-    COOKIES = config['cookies']
 
-    client = V2EX(cookies=COOKIES)
+    client = v2ex.Client(cookies=v2ex.COOKIES)
 
     if client.needs_login():
         client.login(USERNAME, PASSWORD)
@@ -28,6 +27,7 @@ def checkin():
 
     if client.needs_checkin():
         client.checkin()
+        logging.info('Checkin success')
     else:
         logging.info('Already checked in')
 

@@ -6,7 +6,7 @@ with open('README.md') as f:
 setup(
     name='v2checkin',
     description='Yet another checkin tool for v2ex.',
-    version='0.1.1',
+    version='0.1.2',
     license='MIT',
     author='Timothy Qiu',
     packages=[
