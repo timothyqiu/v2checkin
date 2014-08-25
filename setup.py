@@ -1,4 +1,5 @@
 from setuptools import setup
+from v2checkin import config
 
 with open('README.md') as f:
     long_description = f.read()
@@ -6,7 +7,7 @@ with open('README.md') as f:
 setup(
     name='v2checkin',
     description='Yet another checkin tool for v2ex.',
-    version='0.1.2',
+    version=config.VERSION,
     license='MIT',
     author='Timothy Qiu',
     packages=[
