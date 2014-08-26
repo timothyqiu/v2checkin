@@ -11,7 +11,15 @@ from .config import get_config
 from .providers import v2ex, xiami
 
 
-def checkin(client, username, password):
+def checkin(name, config):
+    logging.info('Starting checkin routine for %s', name)
+
+    provider = getattr(sys.modules[__name__], name)
+    client = provider.Client(cookies=provider.COOKIES)
+
+    username = config['username']
+    password = config['password']
+
     if client.needs_login():
         client.login(username, password)
         logging.info('Login success')
@@ -35,19 +43,17 @@ def main():
 
     try:
         config = get_config()
-
-        for name, conf in config.iteritems():
-            logging.info('Starting checkin routine for %s', name)
-            provider = getattr(sys.modules[__name__], name)
-            client = provider.Client(cookies=provider.COOKIES)
-            username = conf['username']
-            password = conf['password']
-            checkin(client, username, password)
-
-        sys.exit(0)
     except Exception as e:
         logging.fatal(e, exc_info=True)
         sys.exit(1)
+
+    for provider, subconfig in config.iteritems():
+        try:
+            checkin(provider, subconfig)
+        except Exception as e:
+            logging.error(e, exc_info=True)
+
+    sys.exit(0)
 
 
 if __name__ == '__main__':
