@@ -11,16 +11,9 @@ from .providers import v2ex
 from .config import get_config
 
 
-def checkin():
-    config = get_config()
-
-    USERNAME = config['username']
-    PASSWORD = config['password']
-
-    client = v2ex.Client(cookies=v2ex.COOKIES)
-
+def checkin(client, username, password):
     if client.needs_login():
-        client.login(USERNAME, PASSWORD)
+        client.login(username, password)
         logging.info('Login success')
     else:
         logging.info('Already logged in')
@@ -41,7 +34,14 @@ def main():
     logging.addLevelName(logging.CRITICAL, 'FATAL')
 
     try:
-        checkin()
+        config = get_config()
+
+        USERNAME = config['username']
+        PASSWORD = config['password']
+
+        client = v2ex.Client(cookies=v2ex.COOKIES)
+        checkin(client, USERNAME, PASSWORD)
+
         sys.exit(0)
     except Exception as e:
         logging.fatal(e, exc_info=True)

@@ -11,16 +11,16 @@ import os
 import sys
 
 
-VERSION = '0.1.2'
+VERSION = '0.1.3'
 AGENT = 'Mozilla/5.0 (Windows NT 6.2; rv:22.0) Gecko/20130405 Firefox/23.0'
 
 
 def get_config_path(path):
     if os.path.exists(path):
         return path
-    user_home = os.getenv('USERPROFILE') or os.getenv('HOME')
-    v2ex_home = os.getenv('V2EX_HOME') or user_home
-    return os.path.join(v2ex_home, path)
+    user_home = os.path.expanduser('~')
+    v2checkin_home = os.getenv('V2CHECKIN_HOME') or user_home
+    return os.path.join(v2checkin_home, path)
 
 
 V2CHECKIN_DEFAULT_CONFIG = get_config_path('.v2checkin.config')
@@ -34,6 +34,21 @@ def load_config(path):
     else:
         config = {}
     return config
+
+
+def check_config(config):
+    if not config:
+        raise Exception('Config not specified')
+
+    if 'username' not in config:
+        raise Exception(
+            'Username not found. Check the config file or use the -u option.'
+        )
+
+    if 'password' not in config:
+        raise Exception(
+            'Password not found. Check the config file or use the -p option.'
+        )
 
 
 def get_config():
@@ -52,17 +67,6 @@ def get_config():
         elif key == '-p':
             config['password'] = value
 
-    if not config:
-        raise Exception('Config not specified')
-
-    if 'username' not in config:
-        raise Exception(
-            'Username not found. Check the config file or use the -u option.'
-        )
-
-    if 'password' not in config:
-        raise Exception(
-            'Password not found. Check the config file or use the -p option.'
-        )
+    check_config(config)
 
     return config
