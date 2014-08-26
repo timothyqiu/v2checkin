@@ -7,8 +7,8 @@ from __future__ import absolute_import
 import logging
 import sys
 
-from .providers import v2ex
 from .config import get_config
+from .providers import v2ex, xiami
 
 
 def checkin(client, username, password):
@@ -36,11 +36,13 @@ def main():
     try:
         config = get_config()
 
-        USERNAME = config['username']
-        PASSWORD = config['password']
-
-        client = v2ex.Client(cookies=v2ex.COOKIES)
-        checkin(client, USERNAME, PASSWORD)
+        for name, conf in config.iteritems():
+            logging.info('Starting checkin routine for %s', name)
+            provider = getattr(sys.modules[__name__], name)
+            client = provider.Client(cookies=provider.COOKIES)
+            username = conf['username']
+            password = conf['password']
+            checkin(client, username, password)
 
         sys.exit(0)
     except Exception as e:

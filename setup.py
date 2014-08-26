@@ -6,7 +6,7 @@ with open('README.md') as f:
 
 setup(
     name='v2checkin',
-    description='Yet another checkin tool for v2ex.',
+    description='This project is a Way to Checkin',
     version=config.VERSION,
     license='MIT',
     author='Timothy Qiu',

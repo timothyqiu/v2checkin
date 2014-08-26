@@ -11,7 +11,7 @@ import os
 import sys
 
 
-VERSION = '0.1.3'
+VERSION = '0.2.0'
 AGENT = 'Mozilla/5.0 (Windows NT 6.2; rv:22.0) Gecko/20130405 Firefox/23.0'
 
 
@@ -40,15 +40,18 @@ def check_config(config):
     if not config:
         raise Exception('Config not specified')
 
-    if 'username' not in config:
-        raise Exception(
-            'Username not found. Check the config file or use the -u option.'
-        )
+    for provider, provider_config in config.iteritems():
+        logging.info('Config found for %s', provider)
 
-    if 'password' not in config:
-        raise Exception(
-            'Password not found. Check the config file or use the -p option.'
-        )
+        if 'username' not in provider_config:
+            raise Exception(
+                'Username not specified for {}'.format(provider)
+            )
+
+        if 'password' not in provider_config:
+            raise Exception(
+                'Password not specified for {}'.format(provider)
+            )
 
 
 def get_config():
@@ -60,12 +63,6 @@ def get_config():
             config_path = value
 
     config = load_config(config_path)
-
-    for key, value in optlist:
-        if key == '-u':
-            config['username'] = value
-        elif key == '-p':
-            config['password'] = value
 
     check_config(config)
 

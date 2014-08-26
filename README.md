@@ -1,18 +1,26 @@
 # v2checkin
 
-Yet another checkin tool for v2ex.
+This project is a Way to Checkin.
 
 ## Configuration
 
 Create a config file `~/.v2checkin.config`. Example:
 
     {
-        "username": "Username",
-        "password": "p@55w0rd"
+        "v2ex": {
+            "username": "v2ex_username",
+            "password": "p@55w0rd"
+        },
+        "xiami": {
+            "username": "xiami_username",
+            "password": "p@55w0rd"
+        }
     }
+
+You can ommit any entry if it is not needed.
 
 ## Command line arguments
 
 You can use arguments to override settings from `.v2checkin.config`.
 
-    v2checkin -c path/to/config -u Username -p p@55w0rd
+    v2checkin -c path/to/config
