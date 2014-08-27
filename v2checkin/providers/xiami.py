@@ -17,6 +17,11 @@ from ..exception import LoginFailure
 COOKIES = config.get_config_path('.v2checkin.xiami.cookies')
 
 
+class AccessForbidden(Exception):
+    def __init__(self):
+        Exception.__init__(self, 'Access forbidden. Are you abroad?')
+
+
 class Client:
 
     def __init__(self, **kwargs):
@@ -69,7 +74,13 @@ class Client:
     def needs_login(self):
         logging.info('Verifying login')
         page = self.get('http://www.xiami.com/index/home')
-        return not page.json()['data']['userInfo']
+        try:
+            return not page.json()['data']['userInfo']
+        except ValueError as e:
+            if '虾米音乐在您所处的国家或地区暂时无法使用' in page.text:
+                raise AccessForbidden()
+            else:
+                raise e
 
     def login(self, username, password):
         logging.info('Start to login as %s', username)
