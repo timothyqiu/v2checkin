@@ -9,6 +9,7 @@ import sys
 
 from .config import get_config
 from .providers import v2ex, xiami
+from .exception import CheckinException
 
 
 def checkin(name, config):
@@ -50,8 +51,8 @@ def main():
     for provider, subconfig in config.iteritems():
         try:
             checkin(provider, subconfig)
-        except Exception as e:
-            logging.error(e, exc_info=True)
+        except CheckinException as e:
+            logging.error(e)
 
     sys.exit(0)
 

@@ -11,15 +11,10 @@ import requests
 import urlparse
 
 from .. import config
-from ..exception import LoginFailure
+from ..exception import LoginFailure, AccessForbidden
 
 
 COOKIES = config.get_config_path('.v2checkin.xiami.cookies')
-
-
-class AccessForbidden(Exception):
-    def __init__(self):
-        Exception.__init__(self, 'Access forbidden. Are you abroad?')
 
 
 class Client:
