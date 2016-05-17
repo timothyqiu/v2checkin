@@ -80,11 +80,13 @@ class Client:
         logging.info('Start to login as %s', username)
         page = self.get('/signin')
         tree = lxml.html.fromstring(page.text)
+        u = tree.xpath('//input[@class="sl" and @type="text"]/@name')[0]
+        p = tree.xpath('//input[@class="sl" and @type="password"]/@name')[0]
         token = tree.xpath('//input[@name="once"]/@value')[0]
 
         payload = {
-            'u': username,
-            'p': password,
+            u: username,
+            p: password,
             'once': token,
             'next': '/',
         }
