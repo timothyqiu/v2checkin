@@ -10,8 +10,11 @@ class CheckinException(Exception):
 
 
 class LoginFailure(CheckinException):
-    def __init__(self):
-        Exception.__init__(self, 'Login failed.')
+    def __init__(self, message=None):
+        if message is None:
+            Exception.__init__(self, 'Login failed.')
+        else:
+            Exception.__init__(self, 'Login failed: {}'.format(message))
 
 
 class CheckinFailure(CheckinException):

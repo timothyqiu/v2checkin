@@ -92,7 +92,9 @@ class Client:
         }
         page = self.post('/signin', data=payload)
         if not page.history:
-            raise LoginFailure()
+            tree = lxml.html.fromstring(page.text)
+            message = tree.xpath('string(//div[@id="Main"]/div/div[@class="problem"])')
+            raise LoginFailure(message)
 
         self.__save_cookies()
 
