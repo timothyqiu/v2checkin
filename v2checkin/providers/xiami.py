@@ -8,9 +8,9 @@ import logging
 import lxml.html
 import pickle
 import requests
-import urlparse
 
 from .. import config
+from .._compat import urllib_parse
 from ..exception import LoginFailure, AccessForbidden
 
 
@@ -48,7 +48,7 @@ class Client:
             pass
 
     def __get_url(self, url):
-        return urlparse.urljoin(self.__baseurl, url)
+        return urllib_parse.urljoin(self.__baseurl, url)
 
     def get(self, url, **kwargs):
         response = self.__session.get(

@@ -10,6 +10,8 @@ import logging
 import os
 import sys
 
+from ._compat import iteritems
+
 
 VERSION = '0.2.1'
 AGENT = 'Mozilla/5.0 (Windows NT 6.2; rv:22.0) Gecko/20130405 Firefox/23.0'
@@ -40,7 +42,7 @@ def check_config(config):
     if not config:
         raise Exception('Config not specified')
 
-    for provider, provider_config in config.iteritems():
+    for provider, provider_config in iteritems(config):
         logging.info('Config found for %s', provider)
 
         if 'username' not in provider_config:

@@ -7,6 +7,7 @@ from __future__ import absolute_import
 import logging
 import sys
 
+from ._compat import iteritems
 from .config import get_config
 from .providers import v2ex, xiami
 from .exception import CheckinException
@@ -48,7 +49,7 @@ def main():
         logging.fatal(e, exc_info=True)
         sys.exit(1)
 
-    for provider, subconfig in config.iteritems():
+    for provider, subconfig in iteritems(config):
         try:
             checkin(provider, subconfig)
         except CheckinException as e:

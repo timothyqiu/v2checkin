@@ -9,9 +9,9 @@ import lxml.html
 import pickle
 import re
 import requests
-import urlparse
 
 from .. import config
+from .._compat import urllib_parse
 from ..exception import LoginFailure, CheckinFailure
 
 
@@ -49,7 +49,7 @@ class Client:
             pass
 
     def __get_url(self, url):
-        return urlparse.urljoin(self.baseurl, url)
+        return urllib_parse.urljoin(self.baseurl, url)
 
     def get(self, url, **kwargs):
         self.session.headers['Referer'] = self.referer
