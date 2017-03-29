@@ -7,10 +7,10 @@ from __future__ import absolute_import
 import logging
 import sys
 
-from ._compat import iteritems
-from .config import get_config
-from .providers import v2ex, xiami
-from .exception import CheckinException
+from v2checkin._compat import iteritems
+from v2checkin.config import get_config
+from v2checkin.providers import v2ex, xiami
+from v2checkin.exception import CheckinException
 
 
 def checkin(name, config):

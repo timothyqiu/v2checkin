@@ -10,9 +10,9 @@ import pickle
 import re
 import requests
 
-from .. import config
-from .._compat import urllib_parse
-from ..exception import LoginFailure, CheckinFailure
+from v2checkin import config
+from v2checkin._compat import urllib_parse
+from v2checkin.exception import LoginFailure, CheckinFailure
 
 
 COOKIES = config.get_config_path('.v2checkin.v2ex.cookies')

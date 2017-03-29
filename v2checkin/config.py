@@ -10,7 +10,7 @@ import logging
 import os
 import sys
 
-from ._compat import iteritems
+from v2checkin._compat import iteritems
 
 
 VERSION = '0.2.1'
