@@ -15,7 +15,7 @@ from v2checkin._compat import urllib_parse
 from v2checkin.exception import LoginFailure, CheckinFailure
 
 
-COOKIES = config.get_config_path('.v2checkin.v2ex.cookies')
+COOKIES = config.get_config_path('.v2checkin.smzdm.cookies')
 
 
 class Client:
@@ -23,8 +23,8 @@ class Client:
     def __init__(self, **kwargs):
         self.session = requests.Session()
         self.session.headers['User-Agent'] = config.AGENT
-        self.baseurl = 'https://www.v2ex.com/'
-        self.referer = self.baseurl
+        self.baseurl = 'https://zhiyou.smzdm.com/'
+        self.referer = 'https://www.smzdm.com/'
 
         if 'cookies' in kwargs:
             self.cookies = kwargs['cookies']
@@ -71,48 +71,47 @@ class Client:
 
     def needs_login(self):
         logging.info('Verifying login')
-        page = self.get('/settings')
-        return len(page.history) > 0
+        page = self.get('/user/info/jsonp_get_current')
+        return page.json()['smzdm_id'] == 0
 
     def login(self, username, password):
         logging.info('Start to login as %s', username)
-        page = self.get('/signin')
-        tree = lxml.html.fromstring(page.text)
-        u = tree.xpath('//input[@class="sl" and @type="text"]/@name')[0]
-        p = tree.xpath('//input[@class="sl" and @type="password"]/@name')[0]
-        token = tree.xpath('//input[@name="once"]/@value')[0]
 
         payload = {
-            u: username,
-            p: password,
-            'once': token,
-            'next': '/',
+            'username': username,
+            'password': password,
+            'rememberme': 1,
+            'captcha': '',
+            'redirect_to': '',
+            'geetest_challenge': '',
+            'geetest_validate': '',
+            'geetest_seccode': '',
         }
-        page = self.post('/signin', data=payload)
-        if not page.history:
-            tree = lxml.html.fromstring(page.text)
-            message = tree.xpath('string(//div[@id="Main"]/div/div[@class="problem"])')
-            raise LoginFailure(message)
+        data = self.post('/user/login/ajax_check', data=payload).json()
+
+        error_code = data['error_code']
+        if error_code != 0:
+            message = data.get('error_msg', '[Unknown]')
+            raise LoginFailure('{}: {}'.format(error_code, message))
 
         self.__save_cookies()
 
     def needs_checkin(self, page=None):
         logging.info('Verifying checkin')
-        if not page:
-            page = self.get('/mission/daily')
-        tree = lxml.html.fromstring(page.text)
-        action = tree.xpath('//input/@onclick')[0]
-        return '/mission/daily' in action
+        page = self.get('/user/info/jsonp_get_current')
+        data = page.json()
+
+        return not data.get('checkin', {}).get('has_checkin', False)
 
     def checkin(self):
-        logging.info('Getting checkin token')
-        page = self.get('/mission/daily')
-        tree = lxml.html.fromstring(page.text)
-        action = tree.xpath('//input/@onclick')[0]
-        match = re.match(r".+?=\s*'(.+)'", action)
+        logging.info('Getting checkin url')
+        data = self.get('/user/info/jsonp_get_current').json()
+        url = data['checkin']['set_checkin_url']
 
         logging.info('Start to checkin')
-        page = self.get(match.group(1))
+        data = self.get(url).json()
 
-        if self.needs_checkin(page):
+        error_code = data['error_code']
+        if error_code != 0:
+            message = data.get('error_msg', '[Unknown]')
             raise CheckinFailure()

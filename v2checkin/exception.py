@@ -18,8 +18,10 @@ class LoginFailure(CheckinException):
 
 
 class CheckinFailure(CheckinException):
-    def __init__(self):
-        Exception.__init__(self, 'Checkin failed.')
+    def __init__(self, message=None):
+        if message is None:
+            message = '[Unknown]'
+        Exception.__init__(self, 'Checkin failed: {}'.format(message))
 
 
 class AccessForbidden(CheckinException):

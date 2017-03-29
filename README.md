@@ -14,6 +14,10 @@ Create a config file `~/.v2checkin.config`. Example:
         "xiami": {
             "username": "xiami_username",
             "password": "p@55w0rd"
+        },
+        "smzdm": {
+            "username": "smzdm_username",
+            "password": "p@55w0rd"
         }
     }
 

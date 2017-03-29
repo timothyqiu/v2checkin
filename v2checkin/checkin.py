@@ -9,7 +9,7 @@ import sys
 
 from v2checkin._compat import iteritems
 from v2checkin.config import get_config
-from v2checkin.providers import v2ex, xiami
+from v2checkin.providers import smzdm, v2ex, xiami
 from v2checkin.exception import CheckinException
 
 
